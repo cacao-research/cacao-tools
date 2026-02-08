@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Cacao
-        run: pip install cacao
+        run: pip install "cacao>=2.0.4"
 
       - name: Build static site
         run: |
