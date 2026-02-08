@@ -38,9 +38,6 @@ def _to_yaml(data, indent=0):
 
 def json_yaml_tool():
     """JSON to YAML converter."""
-    c.text("Convert JSON to YAML format.", color="muted")
-    c.spacer("sm")
-
     output = c.signal("", name="yaml_out")
 
     @c.on("convert_yaml")
@@ -56,17 +53,21 @@ def json_yaml_tool():
         except Exception as e:
             output.set(session, f"Error: {str(e)}")
 
-    c.input("JSON Input", placeholder='{"key": "value"}', on_change="convert_yaml")
-    c.spacer("sm")
-    c.text("YAML Output:", weight="bold")
-    c.code(output, language="yaml")
+    with c.card():
+        c.text("Convert JSON to YAML format.", color="muted")
+        c.spacer()
+
+        with c.row():
+            with c.col(span=6):
+                c.textarea(label="JSON Input", placeholder='{"key": "value", "array": [1, 2, 3]}', rows=10, on_change="convert_yaml")
+
+            with c.col(span=6):
+                c.text("YAML Output", size="sm", color="muted")
+                c.code(output, language="yaml")
 
 
 def case_tool():
     """Case converter."""
-    c.text("Convert text between different case formats.", color="muted")
-    c.spacer("sm")
-
     results = c.signal("", name="case_out")
 
     @c.on("convert_case")
@@ -78,27 +79,31 @@ def case_tool():
 
         words = text.replace("-", " ").replace("_", " ").split()
         output_lines = [
-            f"lowercase: {text.lower()}",
-            f"UPPERCASE: {text.upper()}",
-            f"Title Case: {text.title()}",
-            f"camelCase: {words[0].lower() + ''.join(w.capitalize() for w in words[1:]) if words else ''}",
-            f"PascalCase: {''.join(w.capitalize() for w in words)}",
-            f"snake_case: {'_'.join(w.lower() for w in words)}",
-            f"kebab-case: {'-'.join(w.lower() for w in words)}",
+            f"lowercase:     {text.lower()}",
+            f"UPPERCASE:     {text.upper()}",
+            f"Title Case:    {text.title()}",
+            f"camelCase:     {words[0].lower() + ''.join(w.capitalize() for w in words[1:]) if words else ''}",
+            f"PascalCase:    {''.join(w.capitalize() for w in words)}",
+            f"snake_case:    {'_'.join(w.lower() for w in words)}",
+            f"kebab-case:    {'-'.join(w.lower() for w in words)}",
             f"CONSTANT_CASE: {'_'.join(w.upper() for w in words)}",
         ]
         results.set(session, "\n".join(output_lines))
 
-    c.input("Text", placeholder="Enter text to convert...", on_change="convert_case")
-    c.spacer("sm")
-    c.code(results)
+    with c.card():
+        c.text("Convert text between different case formats.", color="muted")
+        c.spacer()
+
+        c.input("Text Input", placeholder="Enter text to convert...", on_change="convert_case")
+
+        c.spacer()
+
+        c.text("Results", size="sm", color="muted")
+        c.code(results)
 
 
 def number_base_tool():
     """Number base converter."""
-    c.text("Convert numbers between different bases.", color="muted")
-    c.spacer("sm")
-
     results = c.signal("", name="base_out")
 
     @c.on("convert_base")
@@ -119,6 +124,13 @@ def number_base_tool():
         except ValueError:
             results.set(session, "Error: Invalid decimal number")
 
-    c.input("Decimal Number", placeholder="Enter a decimal number...", on_change="convert_base")
-    c.spacer("sm")
-    c.code(results)
+    with c.card():
+        c.text("Convert numbers between binary, octal, decimal, and hexadecimal.", color="muted")
+        c.spacer()
+
+        c.input("Decimal Number", placeholder="Enter a decimal number (e.g., 255)...", on_change="convert_base")
+
+        c.spacer()
+
+        c.text("Conversions", size="sm", color="muted")
+        c.code(results)

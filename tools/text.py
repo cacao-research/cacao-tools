@@ -15,9 +15,6 @@ def render_all():
 
 def stats_tool():
     """Text statistics."""
-    c.text("Analyze text and get detailed statistics.", color="muted")
-    c.spacer("sm")
-
     results = c.signal("", name="stats_out")
 
     @c.on("analyze_text")
@@ -35,28 +32,32 @@ def stats_tool():
         avg_word = round(chars_no_spaces / words, 2) if words > 0 else 0
         reading_time = max(1, words // 200)
 
-        output = f"""Characters: {chars}
-Characters (no spaces): {chars_no_spaces}
-Words: {words}
-Lines: {lines}
-Sentences: {sentences}
-Avg word length: {avg_word}
-Reading time: {reading_time} min"""
+        output = f"""Characters:           {chars:,}
+Characters (no space): {chars_no_spaces:,}
+Words:                {words:,}
+Lines:                {lines:,}
+Sentences:            {sentences:,}
+Avg word length:      {avg_word}
+Reading time:         ~{reading_time} min"""
         results.set(session, output)
 
-    c.input("Text", placeholder="Paste your text here to analyze...", on_change="analyze_text")
-    c.spacer("sm")
-    c.code(results)
+    with c.card():
+        c.text("Analyze text and get detailed statistics.", color="muted")
+        c.spacer()
+
+        c.textarea(label="Text", placeholder="Paste or type your text here to analyze...", rows=8, on_change="analyze_text")
+
+        c.spacer()
+
+        c.text("Statistics", size="sm", color="muted")
+        c.code(results)
 
 
 def regex_tool():
     """Regex tester."""
-    c.text("Test regular expressions against text.", color="muted")
-    c.spacer("sm")
-
     pattern_sig = c.signal("", name="regex_pattern")
     text_sig = c.signal("", name="regex_text")
-    results = c.signal("No matches", name="regex_out")
+    results = c.signal("Enter a pattern and test text", name="regex_out")
 
     @c.on("set_regex_pattern")
     async def set_pattern(session, event):
@@ -73,7 +74,7 @@ def regex_tool():
         text = text_sig.get(session)
 
         if not pattern or not text:
-            results.set(session, "Enter pattern and text to test")
+            results.set(session, "Enter a pattern and test text")
             return
 
         try:
@@ -85,13 +86,26 @@ def regex_tool():
 
             output_lines = [f"Found {len(matches)} match(es):", ""]
             for i, m in enumerate(matches):
-                output_lines.append(f"Match {i + 1}: '{m.group()}' at position {m.start()}-{m.end()}")
+                output_lines.append(f"Match {i + 1}: \"{m.group()}\"")
+                output_lines.append(f"  Position: {m.start()}-{m.end()}")
+                if m.groups():
+                    for j, g in enumerate(m.groups()):
+                        output_lines.append(f"  Group {j + 1}: \"{g}\"")
+                output_lines.append("")
             results.set(session, "\n".join(output_lines))
         except re.error as e:
             results.set(session, f"Invalid regex: {str(e)}")
 
-    c.input("Pattern", placeholder="Enter regex pattern...", on_change="set_regex_pattern")
-    c.spacer("sm")
-    c.input("Test Text", placeholder="Enter text to test against...", on_change="set_regex_text")
-    c.spacer("sm")
-    c.code(results)
+    with c.card():
+        c.text("Test regular expressions against text.", color="muted")
+        c.spacer()
+
+        with c.row():
+            with c.col(span=6):
+                c.input("Pattern", placeholder="Enter regex pattern (e.g., \\d+)...", on_change="set_regex_pattern")
+                c.spacer()
+                c.textarea(label="Test Text", placeholder="Enter text to test against...", rows=6, on_change="set_regex_text")
+
+            with c.col(span=6):
+                c.text("Results", size="sm", color="muted")
+                c.code(results)

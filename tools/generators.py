@@ -20,28 +20,28 @@ def render_all():
 
 def uuid_tool():
     """UUID generator."""
-    c.text("Generate UUIDs (Universally Unique Identifiers).", color="muted")
-    c.spacer("sm")
-
     result = c.signal(str(uuid_lib.uuid4()), name="uuid_result")
 
     @c.on("gen_uuid")
     async def generate(session, event):
         result.set(session, str(uuid_lib.uuid4()))
 
-    c.button("Generate UUID", on_click="gen_uuid", variant="primary")
-    c.spacer("sm")
-
+    # Clean card-based layout
     with c.card():
+        c.text("Generate UUIDs (Universally Unique Identifiers).", color="muted")
+        c.spacer()
+
+        # Large output display
         c.code(result)
+        c.spacer()
+
+        # Action button
+        with c.row(justify="start"):
+            c.button("Generate New UUID", on_click="gen_uuid", variant="primary")
 
 
 def password_tool():
     """Password generator."""
-    c.text("Generate secure random passwords.", color="muted")
-    c.spacer("sm")
-
-    # Generate initial password
     chars = string.ascii_letters + string.digits + "!@#$%^&*"
     initial_pwd = "".join(secrets.choice(chars) for _ in range(16))
 
@@ -56,22 +56,26 @@ def password_tool():
 
     @c.on("set_pwd_length")
     async def set_length(session, event):
-        length.set(session, event.get("value", 16))
-
-    c.slider("Length", min=8, max=64, value=16, on_change="set_pwd_length")
-    c.spacer("sm")
-    c.button("Generate Password", on_click="gen_password", variant="primary")
-    c.spacer("sm")
+        length.set(session, int(event.get("value", 16)))
 
     with c.card():
+        c.text("Generate secure random passwords.", color="muted")
+        c.spacer()
+
+        # Output display
         c.code(password)
+        c.spacer()
+
+        # Controls
+        c.slider("Password Length", min=8, max=64, value=16, on_change="set_pwd_length")
+        c.spacer()
+
+        with c.row(justify="start"):
+            c.button("Generate Password", on_click="gen_password", variant="primary")
 
 
 def lorem_tool():
     """Lorem Ipsum generator."""
-    c.text("Generate placeholder text.", color="muted")
-    c.spacer("sm")
-
     LOREM_WORDS = [
         "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing",
         "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore",
@@ -80,8 +84,8 @@ def lorem_tool():
 
     def gen_paragraph():
         def gen_sentence():
-            length = random.randint(8, 16)
-            words = [random.choice(LOREM_WORDS) for _ in range(length)]
+            sent_length = random.randint(8, 16)
+            words = [random.choice(LOREM_WORDS) for _ in range(sent_length)]
             words[0] = words[0].capitalize()
             return " ".join(words) + "."
         sentences = [gen_sentence() for _ in range(random.randint(4, 8))]
@@ -99,11 +103,19 @@ def lorem_tool():
 
     @c.on("set_lorem_para")
     async def set_para(session, event):
-        para_count.set(session, int(event.get("value", 3)))
+        val = event.get("value", "3")
+        para_count.set(session, int(val) if val else 3)
 
-    with c.row():
-        c.select("Paragraphs", ["1", "2", "3", "4", "5"], on_change="set_lorem_para")
-        c.button("Generate", on_click="gen_lorem", variant="primary")
+    with c.card():
+        c.text("Generate placeholder text for mockups and designs.", color="muted")
+        c.spacer()
 
-    c.spacer("sm")
-    c.text(output)
+        # Controls row
+        with c.row(justify="start"):
+            c.select("Paragraphs", ["1", "2", "3", "4", "5"], on_change="set_lorem_para")
+            c.button("Generate", on_click="gen_lorem", variant="primary")
+
+        c.spacer()
+
+        # Output
+        c.text(output)

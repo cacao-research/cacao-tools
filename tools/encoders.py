@@ -22,14 +22,9 @@ def render_all():
 
 def base64_tool():
     """Base64 encoder/decoder."""
-    c.text("Encode and decode text using Base64 encoding.", color="muted")
-    c.spacer("sm")
-
-    # Create signals
     output = c.signal("", name="base64_out")
     mode = c.signal("encode", name="base64_mode")
 
-    # Event handlers
     @c.on("base64_process")
     async def process(session, event):
         text = event.get("value", "")
@@ -54,22 +49,29 @@ def base64_tool():
     async def set_decode(session, event):
         mode.set(session, "decode")
 
-    with c.row():
-        c.button("Encode", on_click="base64_encode", variant="primary")
-        c.button("Decode", on_click="base64_decode", variant="secondary")
+    with c.card():
+        c.text("Encode and decode text using Base64 encoding.", color="muted")
+        c.spacer()
 
-    c.spacer("sm")
-    c.input("Input", placeholder="Enter text to encode/decode...", on_change="base64_process")
-    c.spacer("sm")
-    c.text("Output:", weight="bold")
-    c.code(output)
+        # Mode toggle
+        with c.row(justify="start"):
+            c.button("Encode", on_click="base64_encode", variant="primary")
+            c.button("Decode", on_click="base64_decode", variant="outline")
+
+        c.spacer()
+
+        # Side by side layout
+        with c.row():
+            with c.col(span=6):
+                c.textarea(label="Input", placeholder="Enter text to encode/decode...", rows=6, on_change="base64_process")
+
+            with c.col(span=6):
+                c.text("Output", size="sm", color="muted")
+                c.code(output)
 
 
 def url_tool():
     """URL encoder/decoder."""
-    c.text("Encode and decode URLs.", color="muted")
-    c.spacer("sm")
-
     output = c.signal("", name="url_out")
     mode = c.signal("encode", name="url_mode")
 
@@ -97,22 +99,27 @@ def url_tool():
     async def set_decode(session, event):
         mode.set(session, "decode")
 
-    with c.row():
-        c.button("Encode", on_click="url_encode", variant="primary")
-        c.button("Decode", on_click="url_decode", variant="secondary")
+    with c.card():
+        c.text("Encode and decode URLs for safe transmission.", color="muted")
+        c.spacer()
 
-    c.spacer("sm")
-    c.input("Input", placeholder="Enter URL to encode/decode...", on_change="url_process")
-    c.spacer("sm")
-    c.text("Output:", weight="bold")
-    c.code(output)
+        with c.row(justify="start"):
+            c.button("Encode", on_click="url_encode", variant="primary")
+            c.button("Decode", on_click="url_decode", variant="outline")
+
+        c.spacer()
+
+        with c.row():
+            with c.col(span=6):
+                c.textarea(label="Input", placeholder="Enter URL to encode/decode...", rows=6, on_change="url_process")
+
+            with c.col(span=6):
+                c.text("Output", size="sm", color="muted")
+                c.code(output)
 
 
 def html_tool():
     """HTML entity encoder/decoder."""
-    c.text("Encode and decode HTML entities.", color="muted")
-    c.spacer("sm")
-
     output = c.signal("", name="html_out")
     mode = c.signal("encode", name="html_mode")
 
@@ -140,22 +147,27 @@ def html_tool():
     async def set_decode(session, event):
         mode.set(session, "decode")
 
-    with c.row():
-        c.button("Encode", on_click="html_encode", variant="primary")
-        c.button("Decode", on_click="html_decode", variant="secondary")
+    with c.card():
+        c.text("Encode and decode HTML entities.", color="muted")
+        c.spacer()
 
-    c.spacer("sm")
-    c.input("Input", placeholder="Enter HTML to encode/decode...", on_change="html_process")
-    c.spacer("sm")
-    c.text("Output:", weight="bold")
-    c.code(output)
+        with c.row(justify="start"):
+            c.button("Encode", on_click="html_encode", variant="primary")
+            c.button("Decode", on_click="html_decode", variant="outline")
+
+        c.spacer()
+
+        with c.row():
+            with c.col(span=6):
+                c.textarea(label="Input", placeholder="Enter HTML to encode/decode...", rows=6, on_change="html_process")
+
+            with c.col(span=6):
+                c.text("Output", size="sm", color="muted")
+                c.code(output)
 
 
 def jwt_tool():
     """JWT decoder."""
-    c.text("Decode JWT tokens to view header and payload.", color="muted")
-    c.spacer("sm")
-
     header_out = c.signal("{}", name="jwt_header")
     payload_out = c.signal("{}", name="jwt_payload")
 
@@ -170,7 +182,7 @@ def jwt_tool():
         try:
             parts = token.split(".")
             if len(parts) != 3:
-                raise ValueError("Invalid JWT format")
+                raise ValueError("Invalid JWT format - expected 3 parts")
 
             # Decode header
             header_b64 = parts[0] + "=" * (-len(parts[0]) % 4)
@@ -185,13 +197,19 @@ def jwt_tool():
             header_out.set(session, f"Error: {str(e)}")
             payload_out.set(session, "")
 
-    c.input("JWT Token", placeholder="Paste your JWT token here...", on_change="jwt_decode")
-    c.spacer("sm")
+    with c.card():
+        c.text("Decode JWT tokens to view header and payload.", color="muted")
+        c.spacer()
 
-    with c.row():
-        with c.col(span=6):
-            c.text("Header:", weight="bold")
-            c.code(header_out, language="json")
-        with c.col(span=6):
-            c.text("Payload:", weight="bold")
-            c.code(payload_out, language="json")
+        c.textarea(label="JWT Token", placeholder="Paste your JWT token here...", rows=3, on_change="jwt_decode")
+
+        c.spacer()
+
+        with c.row():
+            with c.col(span=6):
+                c.text("Header", size="sm", color="muted")
+                c.code(header_out, language="json")
+
+            with c.col(span=6):
+                c.text("Payload", size="sm", color="muted")
+                c.code(payload_out, language="json")

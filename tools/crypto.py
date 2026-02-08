@@ -16,9 +16,6 @@ def render_all():
 
 def hash_tool():
     """Hash generator."""
-    c.text("Generate cryptographic hashes from text.", color="muted")
-    c.spacer("sm")
-
     results = c.signal("", name="hash_out")
 
     @c.on("compute_hash")
@@ -37,19 +34,23 @@ def hash_tool():
         ]
         results.set(session, "\n".join(output_lines))
 
-    c.input("Text", placeholder="Enter text to hash...", on_change="compute_hash")
-    c.spacer("sm")
-    c.code(results)
+    with c.card():
+        c.text("Generate cryptographic hashes from text.", color="muted")
+        c.spacer()
+
+        c.textarea(label="Text", placeholder="Enter text to hash...", rows=4, on_change="compute_hash")
+
+        c.spacer()
+
+        c.text("Hash Results", size="sm", color="muted")
+        c.code(results)
 
 
 def hmac_tool():
     """HMAC generator."""
-    c.text("Generate HMAC (Hash-based Message Authentication Code).", color="muted")
-    c.spacer("sm")
-
     message_sig = c.signal("", name="hmac_msg")
     key_sig = c.signal("", name="hmac_key")
-    result = c.signal("", name="hmac_out")
+    result = c.signal("Enter message and key", name="hmac_out")
 
     @c.on("set_hmac_msg")
     async def set_msg(session, event):
@@ -70,9 +71,18 @@ def hmac_tool():
             return
 
         h = hmac_lib.new(key.encode(), msg.encode(), hashlib.sha256)
-        result.set(session, f"HMAC-SHA256: {h.hexdigest()}")
+        result.set(session, f"HMAC-SHA256:\n{h.hexdigest()}")
 
-    c.input("Message", placeholder="Enter message...", on_change="set_hmac_msg")
-    c.input("Secret Key", placeholder="Enter secret key...", on_change="set_hmac_key")
-    c.spacer("sm")
-    c.code(result)
+    with c.card():
+        c.text("Generate HMAC (Hash-based Message Authentication Code).", color="muted")
+        c.spacer()
+
+        with c.row():
+            with c.col(span=6):
+                c.textarea(label="Message", placeholder="Enter message...", rows=4, on_change="set_hmac_msg")
+                c.spacer()
+                c.input("Secret Key", placeholder="Enter secret key...", on_change="set_hmac_key")
+
+            with c.col(span=6):
+                c.text("HMAC Result", size="sm", color="muted")
+                c.code(result)
